@@ -60,17 +60,20 @@ module "vpc_peering" {
   }
 }
 
+module "rds_postgresql" {
+  source                    = "./modules/rds"
+  workload                  = local.solution_name
+  vpc_id                    = module.vpc_solution.vpc_id
+  subnets                   = module.vpc_solution.private_subnets
+  instance_class            = var.rds_instance_class
+  username                  = var.rds_username
+  password                  = var.rds_password
+  bastin_peering_cidr_block = module.vpc_bastion.cidr_block
 
-# module "rds_mysql" {
-#   source         = "./modules/mysql"
-#   workload       = local.workload
-#   vpc_id         = module.vpc.vpc_id
-#   subnets        = module.vpc.private_subnets
-#   multi_az       = var.rds_multi_az
-#   instance_class = var.rds_instance_class
-#   username       = var.rds_username
-#   password       = var.rds_password
-# }
+  providers = {
+    aws = aws.solution
+  }
+}
 
 # module "jumpserver" {
 #   source    = "./modules/jumpserver"

@@ -10,10 +10,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "multi_az" {
-  type = bool
-}
-
 variable "instance_class" {
   type = string
 }
@@ -25,4 +21,8 @@ variable "username" {
 variable "password" {
   type      = string
   sensitive = true
+}
+
+variable "bastin_peering_cidr_block" {
+  type = string
 }

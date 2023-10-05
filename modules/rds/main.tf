@@ -1,8 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
+}
+
 resource "aws_db_instance" "default" {
   identifier     = "rds-${var.workload}"
-  db_name        = "mysqldb"
-  engine         = "mysql"
-  engine_version = "8.0"
+  db_name        = "pgdatabase"
+  engine         = "postgres"
+  engine_version = "15.3"
   username       = var.username
   password       = var.password
   multi_az       = false
@@ -16,7 +24,7 @@ resource "aws_db_instance" "default" {
 
   instance_class        = var.instance_class
   allocated_storage     = 20
-  max_allocated_storage = 100
+  max_allocated_storage = 30
   storage_type          = "gp3"
   ca_cert_identifier    = "rds-ca-rsa2048-g1"
 
@@ -35,13 +43,13 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.subnets
 }
 
-data "aws_vpc" "selected" {
-  id = var.vpc_id
-}
+# data "aws_vpc" "selected" {
+#   id = var.vpc_id
+# }
 
 resource "aws_security_group" "mysql" {
   name        = "rds-${var.workload}"
-  description = "Allow TLS inbound traffic to RDS MySQL"
+  description = "Allow TLS inbound traffic to RDS PostgreSQL"
   vpc_id      = var.vpc_id
 
   tags = {
@@ -49,12 +57,12 @@ resource "aws_security_group" "mysql" {
   }
 }
 
-resource "aws_security_group_rule" "mysql_ingress" {
-  description       = "Allows MySQL connections"
+resource "aws_security_group_rule" "peering" {
+  description       = "Allows peered connection"
   type              = "ingress"
-  from_port         = 3306
-  to_port           = 3306
+  from_port         = 5432
+  to_port           = 5432
   protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.selected.cidr_block]
+  cidr_blocks       = [var.bastin_peering_cidr_block]
   security_group_id = aws_security_group.mysql.id
 }

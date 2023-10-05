@@ -1,6 +1,6 @@
-# output "rds_address" {
-#   value = module.rds_mysql.address
-# }
+output "rds_address" {
+  value = module.rds_postgresql.address
+}
 
 # output "jumpserver_instance_id" {
 #   value = module.jumpserver.instance_id
