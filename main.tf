@@ -42,6 +42,18 @@ module "vpc_bastion" {
   }
 }
 
+module "vpc_peering" {
+  source                       = "./modules/vpc/peering"
+  bastion_requester_vpc_id     = module.vpc_bastion.vpc_id
+  solution_accepter_vpc_id     = module.vpc_solution.vpc_id
+  solution_accepter_vpc_region = var.solution_region
+
+  providers = {
+    aws.requester = aws.bastion
+    aws.accepter  = aws.solution
+  }
+}
+
 
 # module "rds_mysql" {
 #   source         = "./modules/mysql"
