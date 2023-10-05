@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  userdata = file("${module.path}/userdata.txt")
+  userdata = file("${path.module}/userdata.txt")
 }
 
 resource "aws_iam_instance_profile" "windows" {
