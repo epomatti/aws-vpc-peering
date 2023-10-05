@@ -6,6 +6,10 @@ terraform {
   }
 }
 
+locals {
+  userdata = file("${module.path}/userdata.txt")
+}
+
 resource "aws_iam_instance_profile" "windows" {
   name = "windows-${var.workload}-intance-profile"
   role = aws_iam_role.windows.id
@@ -25,8 +29,9 @@ resource "aws_instance" "windows" {
   vpc_security_group_ids      = [aws_security_group.windows.id]
 
   iam_instance_profile = aws_iam_instance_profile.windows.id
+  key_name             = aws_key_pair.deployer.key_name
 
-  key_name = aws_key_pair.deployer.key_name
+  user_data = local.userdata
 
   metadata_options {
     http_endpoint = "enabled"
