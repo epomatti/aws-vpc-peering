@@ -10,10 +10,14 @@ variable "subnet" {
   type = string
 }
 
-variable "az" {
+variable "instance_type" {
   type = string
 }
 
-variable "allow_ssh" {
-  type = list(string)
+variable "vpc_solution_cidr_block" {
+  type = string
+}
+
+variable "ami" {
+  type = string
 }

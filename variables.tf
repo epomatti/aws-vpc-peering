@@ -16,7 +16,6 @@ variable "bastion_vpc_cidr_prefix" {
 }
 
 ### RDS ###
-
 variable "rds_instance_class" {
   type = string
 }
@@ -31,11 +30,10 @@ variable "rds_password" {
 }
 
 ### Bastion ###
-
-variable "jumpserver_allow_ssh" {
-  type = list(string)
+variable "windows_instance_type" {
+  type = string
 }
 
-variable "windows_instance_type" {
+variable "windows_ami" {
   type = string
 }

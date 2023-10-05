@@ -1,1 +1,0 @@
-winget install -e --id dbeaver.dbeaver

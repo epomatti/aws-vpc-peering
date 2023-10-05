@@ -75,20 +75,16 @@ module "rds_postgresql" {
   }
 }
 
-# module "jumpserver" {
-#   source    = "./modules/jumpserver"
-#   workload  = local.workload
-#   vpc_id    = module.vpc.vpc_id
-#   az        = module.vpc.azs[0]
-#   subnet    = module.vpc.public_subnets[0]
-#   allow_ssh = var.jumpserver_allow_ssh
-# }
+module "windows_bastion" {
+  source                  = "./modules/bastion"
+  workload                = local.bastion_name
+  vpc_id                  = module.vpc_bastion.vpc_id
+  subnet                  = module.vpc_bastion.public_subnet
+  instance_type           = var.windows_instance_type
+  ami                     = var.windows_ami
+  vpc_solution_cidr_block = module.vpc_solution.cidr_block
 
-# module "windows" {
-#   source        = "./modules/windows"
-#   workload      = local.workload
-#   vpc_id        = module.vpc.vpc_id
-#   az            = module.vpc.azs[0]
-#   subnet        = module.vpc.public_subnets[0]
-#   instance_type = var.windows_instance_type
-# }
+  providers = {
+    aws = aws.solution
+  }
+}

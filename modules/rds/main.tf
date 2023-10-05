@@ -29,7 +29,7 @@ resource "aws_db_instance" "default" {
   ca_cert_identifier    = "rds-ca-rsa2048-g1"
 
   storage_encrypted      = true
-  vpc_security_group_ids = [aws_security_group.mysql.id]
+  vpc_security_group_ids = [aws_security_group.postgresql.id]
 
   apply_immediately = true
 
@@ -47,7 +47,7 @@ resource "aws_db_subnet_group" "default" {
 #   id = var.vpc_id
 # }
 
-resource "aws_security_group" "mysql" {
+resource "aws_security_group" "postgresql" {
   name        = "rds-${var.workload}"
   description = "Allow TLS inbound traffic to RDS PostgreSQL"
   vpc_id      = var.vpc_id
@@ -64,5 +64,5 @@ resource "aws_security_group_rule" "peering" {
   to_port           = 5432
   protocol          = "tcp"
   cidr_blocks       = [var.bastin_peering_cidr_block]
-  security_group_id = aws_security_group.mysql.id
+  security_group_id = aws_security_group.postgresql.id
 }

@@ -1,19 +1,32 @@
-resource "aws_iam_instance_profile" "default" {
-  name = "jumpserver-${var.workload}-intance-profile"
-  role = aws_iam_role.default.id
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+  }
 }
 
-resource "aws_instance" "default" {
-  ami           = "ami-08fdd91d87f63bb09"
-  instance_type = "t4g.nano"
+resource "aws_iam_instance_profile" "windows" {
+  name = "windows-${var.workload}-intance-profile"
+  role = aws_iam_role.windows.id
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "windows-deployer-key"
+  public_key = file("${path.module}/../../keys/temp_key.pub")
+}
+
+resource "aws_instance" "windows" {
+  ami           = var.ami
+  instance_type = var.instance_type
 
   associate_public_ip_address = true
   subnet_id                   = var.subnet
-  vpc_security_group_ids      = [aws_security_group.default.id]
+  vpc_security_group_ids      = [aws_security_group.windows.id]
 
-  availability_zone    = var.az
-  iam_instance_profile = aws_iam_instance_profile.default.id
-  user_data            = file("${path.module}/userdata.sh")
+  iam_instance_profile = aws_iam_instance_profile.windows.id
+
+  key_name = aws_key_pair.deployer.key_name
 
   metadata_options {
     http_endpoint = "enabled"
@@ -36,14 +49,14 @@ resource "aws_instance" "default" {
   }
 
   tags = {
-    Name = "default-${var.workload}"
+    Name = "windows-${var.workload}"
   }
 }
 
 ### IAM Role ###
 
-resource "aws_iam_role" "default" {
-  name = "Custom${var.workload}"
+resource "aws_iam_role" "windows" {
+  name = "Custom${var.workload}Windows"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -61,31 +74,27 @@ resource "aws_iam_role" "default" {
 }
 
 resource "aws_iam_role_policy_attachment" "ssm-managed-instance-core" {
-  role       = aws_iam_role.default.name
+  role       = aws_iam_role.windows.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-data "aws_vpc" "selected" {
-  id = var.vpc_id
-}
-
-resource "aws_security_group" "default" {
-  name        = "ec2-ssm-${var.workload}"
+resource "aws_security_group" "windows" {
+  name        = "ec2-ssm-windows-${var.workload}"
   description = "Controls access for EC2 via Session Manager"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "sg-ssm-${var.workload}"
+    Name = "sg-ssm-windows-${var.workload}"
   }
 }
 
-resource "aws_security_group_rule" "ssh" {
+resource "aws_security_group_rule" "rdp" {
   type              = "ingress"
-  from_port         = 22
-  to_port           = 22
+  from_port         = 3389
+  to_port           = 3389
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.default.id
+  security_group_id = aws_security_group.windows.id
 }
 
 resource "aws_security_group_rule" "http" {
@@ -94,7 +103,7 @@ resource "aws_security_group_rule" "http" {
   to_port           = 80
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.default.id
+  security_group_id = aws_security_group.windows.id
 }
 
 resource "aws_security_group_rule" "https" {
@@ -103,14 +112,14 @@ resource "aws_security_group_rule" "https" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.default.id
+  security_group_id = aws_security_group.windows.id
 }
 
-resource "aws_security_group_rule" "mysql" {
+resource "aws_security_group_rule" "postgresql" {
   type              = "egress"
-  from_port         = 3306
-  to_port           = 3306
+  from_port         = 5432
+  to_port           = 5432
   protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.selected.cidr_block]
-  security_group_id = aws_security_group.default.id
+  cidr_blocks       = [var.vpc_solution_cidr_block]
+  security_group_id = aws_security_group.windows.id
 }
