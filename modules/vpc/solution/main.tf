@@ -27,13 +27,21 @@ resource "aws_vpc" "main" {
   }
 }
 
-resource "aws_internet_gateway" "main" {
+resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "ig-${var.workload}"
+    Name = "rt-${var.workload}-priv1"
   }
 }
+
+# resource "aws_route_table" "private2" {
+#   vpc_id = aws_vpc.main.id
+
+#   tags = {
+#     Name = "rt-${var.workload}-priv2"
+#   }
+# }
 
 resource "aws_subnet" "private1" {
   vpc_id                  = aws_vpc.main.id
@@ -55,5 +63,15 @@ resource "aws_subnet" "private2" {
   tags = {
     Name = "subnet-${var.workload}-priv2"
   }
+}
+
+resource "aws_route_table_association" "private1" {
+  subnet_id      = aws_subnet.private2.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private2" {
+  subnet_id      = aws_subnet.private1.id
+  route_table_id = aws_route_table.private.id
 }
 

@@ -64,3 +64,19 @@ resource "aws_vpc_peering_connection_options" "accepter" {
     allow_remote_vpc_dns_resolution = true
   }
 }
+
+resource "aws_route" "bastion_to_solution" {
+  provider = aws.requester
+
+  route_table_id            = var.bastion_requester_route_table_id
+  destination_cidr_block    = var.solution_accepter_vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}
+
+resource "aws_route" "solution_to_bastion" {
+  provider = aws.accepter
+
+  route_table_id            = var.solution_accepter_route_table_id
+  destination_cidr_block    = var.bastion_requester_vpc_cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
+}

@@ -48,6 +48,12 @@ module "vpc_peering" {
   solution_accepter_vpc_id     = module.vpc_solution.vpc_id
   solution_accepter_vpc_region = var.solution_region
 
+  bastion_requester_route_table_id = module.vpc_bastion.route_table_id
+  bastion_requester_vpc_cidr_block = module.vpc_bastion.cidr_block
+
+  solution_accepter_route_table_id = module.vpc_solution.route_table_id
+  solution_accepter_vpc_cidr_block = module.vpc_solution.cidr_block
+
   providers = {
     aws.requester = aws.bastion
     aws.accepter  = aws.solution
