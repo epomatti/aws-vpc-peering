@@ -43,12 +43,8 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.subnets
 }
 
-# data "aws_vpc" "selected" {
-#   id = var.vpc_id
-# }
-
 resource "aws_security_group" "postgresql" {
-  name        = "rds-${var.workload}"
+  name        = "rds-${var.workload}-database"
   description = "Allow TLS inbound traffic to RDS PostgreSQL"
   vpc_id      = var.vpc_id
 

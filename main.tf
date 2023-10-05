@@ -85,6 +85,6 @@ module "windows_bastion" {
   vpc_solution_cidr_block = module.vpc_solution.cidr_block
 
   providers = {
-    aws = aws.solution
+    aws = aws.bastion
   }
 }
