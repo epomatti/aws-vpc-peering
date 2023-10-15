@@ -11,6 +11,12 @@ mkdir keys
 ssh-keygen -f keys/temp_key
 ```
 
+To convert from OPENSSH to RSA:
+
+```sh
+ssh-keygen -p -m PEM -f keys/temp_key
+```
+
 Copy the `.auto.tfvars` sample file:
 
 ```sh
